@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+
 // This simulates the API response as shown in the .docx file
 const apiRespSimulation = {
   "data": [
@@ -134,7 +135,7 @@ const apiRespSimulation = {
       }),
       "SurveyName": "Survey for Carl Internship",
       "RatingQuestion": "How likely are you to recommend our company to a friend or colleague?",
-      "ratingStar": 10,
+      "ratingStar": 5,
       "total_records": 1
     }
   ]

@@ -1,4 +1,5 @@
 // Survey service to fetch survey data and submit responses
+
 import { ApiResponse, QuestionOptions } from '@/types/survey';
 
 /**
@@ -6,7 +7,6 @@ import { ApiResponse, QuestionOptions } from '@/types/survey';
  */
 export async function getSurveyData() {
   try {
-    // When using server components, we need to use the absolute URL
     // Get base URL from environment or use a default for local development
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
@@ -46,14 +46,30 @@ export async function getSurveyData() {
 
 /**
  * Submits survey responses to the API
- * This is currently a placeholder function as submission is not implemented yet
  */
 export async function submitSurveyResponse(responses: Record<string, any>) {
   try {
     console.log('Submitting survey responses:', responses);
     
-    // For now, just simulate a successful submission
-    return { success: true, message: 'Survey submitted successfully' };
+    // Get base URL from environment or use a default for local development
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    
+    // Make the API request to submit the survey
+    const response = await fetch(`${baseUrl}/api/submit-survey`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(responses),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Submission failed with status ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error('Error submitting survey:', error);
     throw error;

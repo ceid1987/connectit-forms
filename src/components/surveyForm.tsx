@@ -14,6 +14,8 @@ const SurveyForm: React.FC<SurveyFormProps> = ({ surveyData, questionOptions }) 
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<any>(null);
+  const ratingIsValid = typeof formData.rating === 'number' && formData.rating >= 1;
 
   const handleInputChange = (questionIndex: number, value: string | string[]) => {
     setFormData(prev => ({
@@ -24,11 +26,23 @@ const SurveyForm: React.FC<SurveyFormProps> = ({ surveyData, questionOptions }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // block submission if no rating
+    if (!ratingIsValid) {
+      alert('Please choose a rating (minimum 1 star) before submitting.');
+      return;
+    }
     setSubmitting(true);
-    
+
     try {
       // Submit the form data to the API
-      await submitSurveyResponse(formData);
+      const result = await submitSurveyResponse({
+        surveyResponses: formData,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      });
+      
+      setSubmissionResult(result);
       setSubmitSuccess(true);
     } catch (error) {
       console.error('Error submitting survey:', error);
@@ -36,14 +50,24 @@ const SurveyForm: React.FC<SurveyFormProps> = ({ surveyData, questionOptions }) 
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
   if (submitSuccess) {
     return (
-      <div className="bg-white border border-purple-200 rounded-lg p-8 text-center">
-        <h2 className="text-2xl font-bold text-purple-800 mb-4">Thank You!</h2>
-        <p className="text-lg mb-6">Your survey response has been submitted successfully.</p>
-        <p>We appreciate your feedback and will use it to improve our services.</p>
+      <div className="bg-white border border-purple-200 rounded-lg p-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-purple-800 mb-4">Thank You!</h2>
+          <p className="text-lg mb-6">Your survey response has been submitted successfully.</p>
+          <p className="mb-8">We appreciate your feedback and will use it to improve our services.</p>
+        </div>
+        
+        {/* Debugging section to show the submitted data */}
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <h3 className="text-lg font-semibold mb-4">Debug: Submission Result</h3>
+          <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-sm max-h-96">
+            {JSON.stringify(submissionResult, null, 2)}
+          </pre>
+        </div>
       </div>
     );
   }
@@ -52,14 +76,14 @@ const SurveyForm: React.FC<SurveyFormProps> = ({ surveyData, questionOptions }) 
     <div className="bg-white border border-purple-200 rounded-lg">
       <div className="text-center p-6 border-b border-purple-100">
         <h1 className="text-2xl font-bold text-purple-800 mb-4">{surveyData.SurveyName}</h1>
-        <h2 className="text-lg font-semibold mb-2">Welcome, {surveyData.Pointofcontact}!</h2>
-        <p className="whitespace-pre-line text-gray-700">{surveyData.WelocomeNote}</p>
+        <h2 className="text-left text-lg font-semibold mb-2">Welcome, {surveyData.Pointofcontact}!</h2>
+        <p className="text-left whitespace-pre-line text-gray-700">{surveyData.WelocomeNote}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6">
         {questionOptions.questions.map((question, index) => (
           <div key={index} className="mb-8 pb-4 border-b border-gray-100">
-            <label className="block mb-3 font-medium">
+            <label className="block mb-3 font-bold">
               {index + 1}. {question.questionText} {question.isRequired && <span className="text-red-500">*</span>}
             </label>
 
@@ -138,7 +162,7 @@ const SurveyForm: React.FC<SurveyFormProps> = ({ surveyData, questionOptions }) 
         ))}
 
         <div className="mb-8 pb-4 border-b border-gray-100">
-          <label className="block mb-3 font-medium">
+          <label className="block mb-3 font-bold">
             {surveyData.RatingQuestion} <span className="text-red-500">*</span>
           </label>
           <div className="flex">
@@ -158,12 +182,17 @@ const SurveyForm: React.FC<SurveyFormProps> = ({ surveyData, questionOptions }) 
               </button>
             ))}
           </div>
+          {!ratingIsValid && (
+            <p className="mt-2 text-sm text-red-600">
+              Please select a rating before submitting.
+            </p>
+          )}
         </div>
 
         <div className="mb-8">
-          <label className="block mb-3 font-medium">
+          <label className="block mb-3 font-bold">
             Please enter your additional comments
-          </label>
+          </label>    
           <textarea
             id="comments"
             name="comments"
@@ -177,7 +206,7 @@ const SurveyForm: React.FC<SurveyFormProps> = ({ surveyData, questionOptions }) 
         <div className="flex justify-center">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !ratingIsValid}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full max-w-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             {submitting ? 'Submitting...' : 'Submit Survey'}
