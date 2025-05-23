@@ -1,77 +1,31 @@
-// Survey service to fetch survey data and submit responses
+// services/surveyService.ts
 
-import { ApiResponse, QuestionOptions } from '@/types/survey';
+// 1) Accept guid
+export async function getSurveyData(guid: string) {
+  const url = `http://cit-app-db-server/SharpDialAPI/api/admin/GetSurveyQuestion?id=0&surveyGuidId=${guid}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
 
-/**
- * Fetches survey data from the API
- */
-export async function getSurveyData() {
-  try {
-    // Get base URL from environment or use a default for local development
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    
-    // Make the API request with the full URL
-    const response = await fetch(`${baseUrl}/api/form-data`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store', // Ensures fresh data is fetched each time
-    });
+  const { data } = await res.json();        // ApiResponse
+  const surveyData = data[0];
+  const questionOptions = JSON.parse(surveyData.QuestionOptionJson);
 
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-
-    // Parse the response
-    const responseData: ApiResponse = await response.json();
-    
-    // Get the first survey data (assuming we only have one)
-    const surveyData = responseData.data[0];
-    
-    // Parse the JSON string to get the questions
-    const questionOptions: QuestionOptions = JSON.parse(surveyData.QuestionOptionJson);
-    
-    return {
-      surveyData,
-      questionOptions
-    };
-  } catch (error) {
-    console.error('Error fetching survey data:', error);
-    throw error;
-  }
+  return { surveyData, questionOptions };
 }
 
-/**
- * Submits survey responses to the API
- */
-export async function submitSurveyResponse(responses: Record<string, any>) {
-  try {
-    console.log('Submitting survey responses:', responses);
-    
-    // Get base URL from environment or use a default for local development
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    
-    // Make the API request to submit the survey
-    const response = await fetch(`${baseUrl}/api/submit-survey`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(responses),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Submission failed with status ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error submitting survey:', error);
-    throw error;
-  }
+// 2) Also accept guid in your submit call
+export async function submitSurveyResponse(payload: {
+  guid: string;
+  surveyData: any;
+  questionOptions: any;
+  surveyResponses: Record<string, any>;
+  startTime: string;
+}) {
+  const res = await fetch('http://cit-app-db-server/SharpDialAPI/api/admin/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Submission failed');
+  return res.json();
 }
