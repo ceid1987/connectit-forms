@@ -78,10 +78,7 @@ export default function SurveyForm({
 
     try {
       const endTime = formatDate(new Date());
-      const transactionguidid = `submission_${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 9)}`;
-
+      const transactionguidid = surveyData.TransactionGuidId;
       const questions = questionOptions.questions.map((q, i) => ({
         answerOptions: q.answerOptions,
         inputType: q.inputType,

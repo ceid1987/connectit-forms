@@ -60,7 +60,6 @@ export async function POST(request: Request) {
       userRating: surveyResponses.rating || 0
     };
 
-    // ——— RETURN exactly the shape you wanted ———
     console.log('Formatted response payload:', payload);
     return NextResponse.json(payload);
   } catch (error) {
