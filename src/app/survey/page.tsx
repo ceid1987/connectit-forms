@@ -1,6 +1,6 @@
 // Survey page
 // Loads data from the survey service and renders the survey form
-/* Remove comment for testing
+/*
 import { getSurveyData } from '@/services/surveyService';
 import SurveyForm from '@/components/surveyForm';
 
@@ -31,4 +31,4 @@ export default async function SurveyPage() {
     );
   }
 }
-*/
+  */

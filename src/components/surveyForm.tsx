@@ -1,8 +1,15 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { QuestionOptions, SurveyData } from '@/types/survey';
+import {
+  QuestionOptions,
+  SurveyData,
+  SubmitResponse,
+  SubmitPayload,
+} from '@/types/survey';
 import { submitSurveyResponse } from '@/services/surveyService';
+
+type FormData = Record<string, string | string[] | number>;
 
 interface SurveyFormProps {
   surveyData: SurveyData;
@@ -13,12 +20,11 @@ interface SurveyFormProps {
 export default function SurveyForm({
   surveyData,
   questionOptions,
-  guid,
 }: SurveyFormProps) {
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<FormData>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<any>(null);
+  const [submissionResult, setSubmissionResult] = useState<SubmitResponse | null>(null);
 
   // Capture startTime once
   const startTime = useMemo(() => {
@@ -34,8 +40,21 @@ export default function SurveyForm({
     );
   }, []);
 
+  // Helper to format endTime
+  const formatDate = (date: Date) => {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return (
+      `${date.getFullYear()}-` +
+      `${pad(date.getMonth() + 1)}-` +
+      `${pad(date.getDate())} ` +
+      `${pad(date.getHours())}:` +
+      `${pad(date.getMinutes())}:` +
+      `${pad(date.getSeconds())}`
+    );
+  };
+
   const ratingIsValid =
-    typeof formData.rating === 'number' && formData.rating >= 1;
+    typeof formData.rating === 'number' && (formData.rating as number) >= 1;
 
   const handleInputChange = (
     questionIndex: number,
@@ -58,41 +77,55 @@ export default function SurveyForm({
     setSubmitting(true);
 
     try {
-      const result = await submitSurveyResponse({
-        guid,
-        surveyData,
-        questionOptions,
-        surveyResponses: formData,
+      const endTime = formatDate(new Date());
+      const transactionguidid = `submission_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 9)}`;
+
+      const questions = questionOptions.questions.map((q, i) => ({
+        answerOptions: q.answerOptions,
+        inputType: q.inputType,
+        isRequired: q.isRequired,
+        questionText: q.questionText,
+        userResponse: Array.isArray(formData[`question_${i}`])
+          ? (formData[`question_${i}`] as string[]).join(', ')
+          : (formData[`question_${i}`] as string) || '',
+      }));
+
+      const payload: SubmitPayload = {
+        comments: (formData.comments as string) || '',
+        endTime,
+        questions,
+        ratingQuestion: surveyData.RatingQuestion,
         startTime,
-      });
+        transactionguidid,
+        userRating: (formData.rating as number) || 0,
+      };
+
+      console.log('Submitting payload:', payload);
+      const result = await submitSurveyResponse(payload);
 
       setSubmissionResult(result);
       setSubmitSuccess(true);
     } catch (error) {
       console.error('Error submitting survey:', error);
       alert(
-        'An error occurred while submitting the survey. Please try again.'
+        'An error occurred while submitting the survey. Please try again later.'
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (submitSuccess) {
+  if (submitSuccess && submissionResult) {
     return (
       <div className="bg-white border border-purple-200 rounded-lg p-8">
-        <div className="text-left mb-8">
-          <h2 className="text-2xl font-bold text-purple-800 mb-4">
-            Thank You!
-          </h2>
-          <p className="text-lg mb-6">
-            Your survey response has been submitted successfully.
-          </p>
-          <p className="mb-8">
-            We appreciate your feedback and will use it to improve our
-            services.
-          </p>
-        </div>
+        <h2 className="text-2xl font-bold text-purple-800 mb-4">
+          Thank You!
+        </h2>
+        <p className="text-lg mb-6">
+          Your survey response has been submitted successfully.
+        </p>
         <div className="mt-8 pt-8 border-t border-gray-200">
           <h3 className="text-lg font-semibold mb-4">
             Debug: Submission Result
@@ -121,16 +154,24 @@ export default function SurveyForm({
 
       <form onSubmit={handleSubmit} className="p-6">
         {questionOptions.questions.map((question, index) => (
-          <div key={index} className="mb-8 pb-4 border-b border-gray-100">
+          <div
+            key={index}
+            className="mb-8 pb-4 border-b border-gray-100"
+          >
             <label className="block mb-3 font-bold">
               {index + 1}. {question.questionText}{' '}
-              {question.isRequired && <span className="text-red-500">*</span>}
+              {question.isRequired && (
+                <span className="text-red-500">*</span>
+              )}
             </label>
 
             {question.inputType === 'radio' && (
               <div className="space-y-2 ml-1">
                 {question.answerOptions.map((option, optIdx) => (
-                  <div key={optIdx} className="flex items-center my-2">
+                  <div
+                    key={optIdx}
+                    className="flex items-center my-2"
+                  >
                     <input
                       type="radio"
                       id={`question_${index}_option_${optIdx}`}
@@ -156,7 +197,10 @@ export default function SurveyForm({
             {question.inputType === 'checkbox' && (
               <div className="space-y-2 ml-1">
                 {question.answerOptions.map((option, optIdx) => (
-                  <div key={optIdx} className="flex items-center my-2">
+                  <div
+                    key={optIdx}
+                    className="flex items-center my-2"
+                  >
                     <input
                       type="checkbox"
                       id={`question_${index}_option_${optIdx}`}
@@ -166,7 +210,9 @@ export default function SurveyForm({
                         const current = Array.isArray(
                           formData[`question_${index}`]
                         )
-                          ? [...formData[`question_${index}`]]
+                          ? [...(formData[
+                              `question_${index}`
+                            ] as string[])]
                           : [];
                         if (e.target.checked) {
                           handleInputChange(index, [...current, option]);
@@ -217,7 +263,7 @@ export default function SurveyForm({
                 key={i}
                 type="button"
                 className={`text-2xl focus:outline-none ${
-                  formData.rating && i < formData.rating
+                  formData.rating && i < (formData.rating as number)
                     ? 'text-black'
                     : 'text-gray-300'
                 }`}
@@ -227,7 +273,7 @@ export default function SurveyForm({
                     rating: i + 1,
                   }))
                 }
-                aria-label={`Rate ${i + 1} out of ${surveyData.ratingStar}`}
+                aria-label={`Rate ${i + 1}`}
               >
                 ★
               </button>
