@@ -117,20 +117,12 @@ export default function SurveyForm({
   if (submitSuccess && submissionResult) {
     return (
       <div className="bg-white border border-purple-200 rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-purple-800 mb-4">
+        <h2 className="text-2xl font-bold text-purple-800 mb-4 text-center">
           Thank You!
         </h2>
         <p className="text-lg mb-6">
           Your survey response has been submitted successfully.
         </p>
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <h3 className="text-lg font-semibold mb-4">
-            Debug: Submission Result
-          </h3>
-          <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-sm max-h-96">
-            {JSON.stringify(submissionResult, null, 2)}
-          </pre>
-        </div>
       </div>
     );
   }
