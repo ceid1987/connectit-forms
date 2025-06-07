@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Add Image optimization config
+  images: {
+    unoptimized: false,
+    domains: [],
+    formats: ['image/webp', 'image/avif'],
+  },
 };
 
 export default nextConfig;

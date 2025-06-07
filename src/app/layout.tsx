@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Image from "next/image";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,7 +31,7 @@ export default function RootLayout({
         <header className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200 z-50">
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="flex items-center">
-              <Image 
+              <img 
                 src="/cit-logo.png" 
                 alt="ConnectIT Logo" 
                 width={120}
