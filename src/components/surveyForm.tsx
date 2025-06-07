@@ -109,21 +109,23 @@ export default function SurveyForm({
       console.error('Error submitting survey:', error);
       alert(
         'An error occurred while submitting the survey. Please try again later.'
-      );
-    } finally {
+      );    } finally {
       setSubmitting(false);
     }
-  };  if (submitSuccess && submissionResult) {
-    return (      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
-        <div className="bg-white border border-[#551132]/20 rounded-lg p-8 max-w-md w-full">
-          <div className="flex items-center justify-center mb-4">
-            <span className={`text-3xl mr-3 ${styles.thumbsUpAnimation}`}>
+  };
+
+  if (submitSuccess && submissionResult) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+        <div className="bg-white border border-green-500/40 rounded-lg p-8 max-w-md w-full">
+          <div className="flex justify-center mb-4">
+            <span className={`text-3xl ${styles.thumbsUpAnimation}`}>
               👍
             </span>
-            <h2 className="text-2xl font-bold text-[#551132]">
-              Thank You!
-            </h2>
           </div>
+          <h2 className="text-2xl font-bold text-green-600 text-center mb-4">
+            Thank You!
+          </h2>
           <p className="text-lg mb-6 text-center">
             Your survey response has been submitted successfully.
           </p>
