@@ -8,6 +8,7 @@ import {
   SubmitPayload,
 } from '@/types/survey';
 import { submitSurveyResponse } from '@/services/surveyService';
+import styles from './surveyForm.module.css';
 
 type FormData = Record<string, string | string[] | number>;
 
@@ -112,25 +113,28 @@ export default function SurveyForm({
     } finally {
       setSubmitting(false);
     }
-  };
-
-  if (submitSuccess && submissionResult) {
-    return (
-      <div className="bg-white border border-purple-200 rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-purple-800 mb-4 text-center">
-          Thank You!
-        </h2>
-        <p className="text-lg mb-6">
-          Your survey response has been submitted successfully.
-        </p>
+  };  if (submitSuccess && submissionResult) {
+    return (      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+        <div className="bg-white border border-[#551132]/20 rounded-lg p-8 max-w-md w-full">
+          <div className="flex items-center justify-center mb-4">
+            <span className={`text-3xl mr-3 ${styles.thumbsUpAnimation}`}>
+              👍
+            </span>
+            <h2 className="text-2xl font-bold text-[#551132]">
+              Thank You!
+            </h2>
+          </div>
+          <p className="text-lg mb-6 text-center">
+            Your survey response has been submitted successfully.
+          </p>
+        </div>
       </div>
     );
   }
-
   return (
-    <div className="bg-white border border-purple-200 rounded-lg">
-      <div className="text-left p-6 border-b border-purple-100">
-        <h1 className="text-2xl font-bold text-purple-800 mb-4">
+    <div className="bg-white border border-[#551132]/20 rounded-lg">
+      <div className="text-left p-6 border-b border-[#551132]/10">
+        <h1 className="text-2xl font-bold text-[#551132] mb-4">
           {surveyData.SurveyName}
         </h1>
         <h2 className="text-lg font-semibold mb-2">
@@ -160,8 +164,7 @@ export default function SurveyForm({
                   <div
                     key={optIdx}
                     className="flex items-center my-2"
-                  >
-                    <input
+                  >                    <input
                       type="radio"
                       id={`question_${index}_option_${optIdx}`}
                       name={`question_${index}`}
@@ -170,7 +173,7 @@ export default function SurveyForm({
                       onChange={(e) =>
                         handleInputChange(index, e.target.value)
                       }
-                      className="mr-3 h-4 w-4"
+                      className={`mr-3 ${styles.customRadio}`}
                     />
                     <label
                       htmlFor={`question_${index}_option_${optIdx}`}
@@ -189,8 +192,7 @@ export default function SurveyForm({
                   <div
                     key={optIdx}
                     className="flex items-center my-2"
-                  >
-                    <input
+                  >                    <input
                       type="checkbox"
                       id={`question_${index}_option_${optIdx}`}
                       name={`question_${index}`}
@@ -212,7 +214,7 @@ export default function SurveyForm({
                           );
                         }
                       }}
-                      className="mr-3 h-4 w-4"
+                      className={`mr-3 ${styles.customCheckbox}`}
                     />
                     <label
                       htmlFor={`question_${index}_option_${optIdx}`}
@@ -230,11 +232,10 @@ export default function SurveyForm({
                 type="text"
                 id={`question_${index}`}
                 name={`question_${index}`}
-                required={question.isRequired}
-                onChange={(e) =>
+                required={question.isRequired}                onChange={(e) =>
                   handleInputChange(index, e.target.value)
                 }
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#551132]"
                 placeholder="Your Answer"
               />
             )}
@@ -281,9 +282,8 @@ export default function SurveyForm({
           </label>
           <textarea
             id="comments"
-            name="comments"
-            rows={4}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+            name="comments"            rows={4}
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#551132]"
             onChange={(e) =>
               setFormData((prev) => ({
                 ...prev,
@@ -292,13 +292,11 @@ export default function SurveyForm({
             }
             placeholder="Enter your comments here..."
           />
-        </div>
-
-        <div className="flex justify-center">
+        </div>        <div className="flex justify-center">
           <button
             type="submit"
             disabled={submitting || !ratingIsValid}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full max-w-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            className="px-6 py-3 bg-[#951e4e] text-white rounded-lg hover:bg-[#951e4e]/90 transition-colors w-full max-w-md focus:outline-none focus:ring-2 focus:ring-[#951e4e] focus:ring-offset-2 disabled:opacity-50"
           >
             {submitting ? 'Submitting...' : 'Submit Survey'}
           </button>
