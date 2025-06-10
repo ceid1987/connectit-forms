@@ -136,7 +136,7 @@ export default function SurveyForm({
   return (
     <div className="bg-white border border-[#551132]/20 rounded-lg">
       <div className="text-left p-6 border-b border-[#551132]/10">
-        <h1 className="text-2xl font-bold text-[#551132] mb-4">
+        <h1 className="text-center text-2xl font-bold text-[#551132] mb-4">
           {surveyData.SurveyName}
         </h1>
         <h2 className="text-lg font-semibold mb-2">
