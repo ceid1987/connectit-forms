@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ConnectIT Survey",
   description: "Customer Satisfaction Survey",
+  icons: {
+    icon: "/favicon-16x16.png",
+  },
 };
 
 export default function RootLayout({
